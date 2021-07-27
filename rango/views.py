@@ -8,8 +8,6 @@ from django.http import HttpResponse
 
 def index(request):
     context_dict = {'boldmessage': 'Crunchy, creamy, cookie, candy, cupcake!'}
-    # add this line for chapter 3 tests
-    return HttpResponse("Rango says hey there partner!<a href='/rango/about/'>About</a>")
     return render(request, 'rango/index.html', context=context_dict)
 
 def about(request):
