@@ -58,6 +58,7 @@ def show_category(request, category_name_slug):
     return render(request, 'rango/category.html', context=context_dict)
 
 
+@login_required
 def add_category(request):
     form = CategoryForm()
     if request.method == 'POST':
@@ -70,6 +71,7 @@ def add_category(request):
     return render(request, 'rango/add_category.html', {'form': form})
 
 
+@login_required
 def add_page(request, category_name_slug):
     try:
         category = Category.objects.get(slug=category_name_slug)
@@ -99,44 +101,35 @@ def add_page(request, category_name_slug):
 
 
 def register(request):
-    # A boolean value for telling the template
-    # whether the registration was successful.
-    # Set to False initially. Code changes value to # True when registration succeeds.
     registered = False
-    # If it's a HTTP POST, we're interested in processing form data.
+
     if request.method == 'POST':
-        # Attempt to grab information from the raw form information. # Note that we make use of both UserForm and UserProfileForm.
         user_form = UserForm(request.POST)
         profile_form = UserProfileForm(request.POST)
-        # If the two forms are valid...
+
         if user_form.is_valid() and profile_form.is_valid():  # Save the user's form data to the database.
             user = user_form.save()
-            # Now we hash the password with the set_password method. # Once hashed, we can update the user object.
             user.set_password(user.password)
             user.save()
-            # until we're ready to avoid integrity problems.
+
             profile = profile_form.save(commit=False)
             profile.user = user
-            # Did the user provide a profile picture?
-            # If so, we need to get it from the input form and #put it in the UserProfile model.
+
             if 'picture' in request.FILES:
                 profile.picture = request.FILES['picture']  # Now we save the UserProfile model instance.
+
             profile.save()
-            # Update our variable to indicate that the template # registration was successful.
             registered = True
         else:
-            # Invalid form or forms - mistakes or something else?
-            # Print problems to the terminal.
             print(user_form.errors, profile_form.errors)
     else:
-        # Not a HTTP POST, so we render our form using two ModelForm instances. # These forms will be blank, ready for user input.
         user_form = UserForm()
         profile_form = UserProfileForm()
-        # Render the template depending on the context.
-        return render(request, 'rango/register.html',
-                      context={'user_form': user_form,
-                               'profile_form': profile_form,
-                               'registered': registered})
+
+    return render(request, 'rango/register.html',
+                  context={'user_form': user_form,
+                           'profile_form': profile_form,
+                           'registered': registered})
 
 
 def user_login(request):
@@ -178,7 +171,7 @@ def user_login(request):
 
 @login_required
 def restricted(request):
-    return HttpResponse("Since you're logged in, you can see this text!")
+    return render(request, 'rango/restricted.html')
 
 
 # Use the login_required() decorator to ensure only those logged in can # access the view.
